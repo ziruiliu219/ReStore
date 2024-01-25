@@ -2,20 +2,24 @@ import { Divider, Grid, Table, TableBody, TableCell, TableRow, Typography } from
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Product } from "../../app/models/product";
-import axios from "axios";
+import agent from "../../app/api/agent";
+import NotFound from "../../app/errors/NotFound";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default function ProductDetailPage(){
     const {id}=useParams<{id:string}>();
     const [product,setProduct]=useState<Product|null>(null);
     const [loading,setLoading]=useState(true);
     useEffect(()=>{
-        axios.get(`http://localhost:5000/api/products/${id}`)
-        .then(response=>setProduct(response.data))
+        //axios.get(`http://localhost:5000/api/products/${id}`)
+        id&&agent.Catalog.details(parseInt(id)) ///there might be an error
+        .then(response=>setProduct(response))
+        .catch(error=>console.log(error))
         .finally(()=>setLoading(false));
     },[id])
 
-    if(loading)return <h3>loading...</h3>
-    if(!product)return <h3>product not found</h3>
+    if(loading)return <LoadingComponent message="loading product...."/>
+    if(!product)return <NotFound></NotFound>
     return(
         <Grid container spacing={6}>
             <Grid item xs={6}>
@@ -50,7 +54,6 @@ export default function ProductDetailPage(){
                     </TableBody>
                 </Table>
             </Grid>
-
         </Grid>
     )
 }
